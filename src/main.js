@@ -29,6 +29,7 @@ let config = {
 
     scene: [
         Load,
+        Title,
         Platformer
     ]
 };

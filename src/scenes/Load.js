@@ -163,6 +163,6 @@ class Load extends Phaser.Scene {
         graphics.generateTexture("whiteParticle", 8, 8);
         graphics.destroy();
 
-        this.scene.start("platformerScene");
+        this.scene.start("titleScene");
     }
 }
