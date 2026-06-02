@@ -368,21 +368,14 @@ class Platformer extends Phaser.Scene {
 
         this.cameras.main.shake(200, 0.01);
 
-        const { width, height } = this.scale;
-        const message = this.add.text(
-            width / 2,
-            height / 2,
-            "LEVEL COMPLETE\nPress R to restart",
-            {
-                fontSize: "32px",
-                fill: "#ffffff",
-                align: "center"
-            }
-        );
-
-        message.setScrollFactor(0);
-        message.setOrigin(0.5);
-        message.setDepth(200);
+        // Fade to black then show credits scene
+        this.time.delayedCall(700, () => {
+            this.cameras.main.fadeOut(700, 0, 0, 0);
+            this.cameras.main.once("camerafadeoutcomplete", () => {
+                this.sound.stopAll();
+                this.scene.start("creditsScene");
+            });
+        });
     }
 
     update() {

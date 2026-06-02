@@ -30,7 +30,8 @@ let config = {
     scene: [
         Load,
         Title,
-        Platformer
+        Platformer,
+        Credits
     ]
 };
 
