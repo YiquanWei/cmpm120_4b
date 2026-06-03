@@ -112,7 +112,7 @@ class Credits extends Phaser.Scene {
         });
 
         this.input.keyboard.once("keydown-R", () => {
-            this.scene.start("platformerScene");
+            this.scene.start("platformerScene", { level: 0 });
         });
     }
 }
