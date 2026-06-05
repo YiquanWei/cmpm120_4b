@@ -187,6 +187,19 @@ class Platformer extends Phaser.Scene {
         this.totalCoins = this.coins.length;
         this.levelComplete = false;
 
+        // Divide by SCALE so camera zoom places it at the actual bottom-left of the canvas
+        my.text.coinsLeft = this.add.text(
+            380 / this.SCALE,
+            (this.scale.height + 42) / this.SCALE,
+            "Signals left: " + this.totalCoins,
+            {
+                fontSize: "20px",
+                fill: "#ffffff"
+            }
+        );
+        my.text.coinsLeft.setScrollFactor(0);
+        my.text.coinsLeft.setDepth(100);
+
         this.physics.add.overlap(
             my.sprite.player,
             this.coinGroup,
@@ -214,6 +227,10 @@ class Platformer extends Phaser.Scene {
 
                 my.text.score.setText(
                     "Signals: " + this.score
+                );
+
+                my.text.coinsLeft.setText(
+                    "Signals left: " + (this.totalCoins - this.score)
                 );
 
                 if (this.score >= this.totalCoins) {
