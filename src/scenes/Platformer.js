@@ -6,8 +6,9 @@ class Platformer extends Phaser.Scene {
         super("platformerScene");
     }
 
-    init() {
+    init(data) {
 
+        this.currentLevel = data.level ?? 0;
         this.ACCELERATION = 180;
         this.DRAG = 180;
         this.AIR_DRAG = 40;
@@ -71,7 +72,9 @@ class Platformer extends Phaser.Scene {
         // MAP
         // =========================================
 
-        this.map = this.add.tilemap("first_orbit");
+        const levelConfig = LEVELS[this.currentLevel];
+
+        this.map = this.add.tilemap(levelConfig.mapKey);
 
         this.tileset = this.map.addTilesetImage(
             "map_tiles",
@@ -144,8 +147,8 @@ class Platformer extends Phaser.Scene {
         // =========================================
 
         my.sprite.player = this.physics.add.sprite(
-            56,
-            264,
+            levelConfig.spawnX,
+            levelConfig.spawnY,
             "player",
             0
         );
@@ -355,6 +358,31 @@ class Platformer extends Phaser.Scene {
         this.cameras.main.setZoom(
             this.SCALE
         );
+
+        // =========================================
+        // LEVEL TITLE CARD
+        // =========================================
+
+        this.cameras.main.fadeIn(600, 0, 0, 0);
+
+        const levelLabel = this.add.text(
+            this.scale.width / 2,
+            this.scale.height / 2,
+            "Level " + (this.currentLevel + 1),
+            {
+                fontSize: "48px",
+                fill: "#ffffff",
+                fontStyle: "bold"
+            }
+        ).setScrollFactor(0).setOrigin(0.5).setDepth(300);
+
+        this.tweens.add({
+            targets: levelLabel,
+            alpha: 0,
+            duration: 600,
+            delay: 1000,
+            onComplete: () => levelLabel.destroy()
+        });
     }
 
     completeLevel() {
@@ -368,12 +396,17 @@ class Platformer extends Phaser.Scene {
 
         this.cameras.main.shake(200, 0.01);
 
-        // Fade to black then show credits scene
+        // Fade to black then advance to next level or credits
         this.time.delayedCall(700, () => {
             this.cameras.main.fadeOut(700, 0, 0, 0);
             this.cameras.main.once("camerafadeoutcomplete", () => {
                 this.sound.stopAll();
-                this.scene.start("creditsScene");
+                const nextLevel = this.currentLevel + 1;
+                if (nextLevel < LEVELS.length) {
+                    this.scene.start("platformerScene", { level: nextLevel });
+                } else {
+                    this.scene.start("creditsScene");
+                }
             });
         });
     }
@@ -382,7 +415,7 @@ class Platformer extends Phaser.Scene {
 
         if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
             this.sound.stopAll();
-            this.scene.restart();
+            this.scene.start("platformerScene", { level: this.currentLevel });
         }
 
         if (this.levelComplete) {

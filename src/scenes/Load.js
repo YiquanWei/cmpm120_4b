@@ -24,6 +24,11 @@ class Load extends Phaser.Scene {
             "first_orbit_embedded.json"
         );
 
+        this.load.tilemapTiledJSON(
+            "second_orbit",
+            "second_orbit_embedded.json"
+        );
+
         // Same image, loaded as spritesheet for coin animation
         this.load.spritesheet(
             "tilemap_sheet",

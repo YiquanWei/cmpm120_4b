@@ -96,7 +96,7 @@ var my = {
 // Level configs — mapKey must match the key used in Load.js, spawnX/Y is player start position
 const LEVELS = [
     { mapKey: "first_orbit",  spawnX: 56,  spawnY: 264 },
-    { mapKey: "second_orbit", spawnX: 56,  spawnY: 264 }
+    { mapKey: "second_orbit", spawnX: 24,  spawnY: 552 }
 ];
 
 const game = new Phaser.Game(config);

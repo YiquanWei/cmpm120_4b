@@ -98,7 +98,7 @@ class Title extends Phaser.Scene {
         // =========================================
 
         this.input.keyboard.once("keydown-SPACE", () => {
-            this.scene.start("platformerScene");
+            this.scene.start("platformerScene", { level: 0 });
         });
     }
 }
