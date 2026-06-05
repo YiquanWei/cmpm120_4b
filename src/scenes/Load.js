@@ -154,6 +154,29 @@ class Load extends Phaser.Scene {
         });
 
         // =====================================
+        // ENEMY ANIMATION
+        // enemy frame IDs are 383 and 384
+        // =====================================
+
+        this.anims.create({
+            key: "enemyWalk",
+
+            frames: [
+                {
+                    key: "tilemap_sheet",
+                    frame: 383
+                },
+                {
+                    key: "tilemap_sheet",
+                    frame: 384
+                }
+            ],
+
+            frameRate: 6,
+            repeat: -1
+        });
+
+        // =====================================
         // SIMPLE PARTICLE TEXTURE
         // =====================================
 

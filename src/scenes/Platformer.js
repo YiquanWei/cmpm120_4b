@@ -9,6 +9,7 @@ class Platformer extends Phaser.Scene {
     init(data) {
 
         this.currentLevel = data.level ?? 0;
+        this.isHurt = false;
         this.ACCELERATION = 180;
         this.DRAG = 180;
         this.AIR_DRAG = 40;
@@ -73,6 +74,7 @@ class Platformer extends Phaser.Scene {
         // =========================================
 
         const levelConfig = LEVELS[this.currentLevel];
+        this.levelConfig = levelConfig;
 
         this.map = this.add.tilemap(levelConfig.mapKey);
 
@@ -221,12 +223,81 @@ class Platformer extends Phaser.Scene {
         );
 
         // =========================================
+        // ENEMIES
+        //
+        // Tiled: Object layer "Objects", Name = "enemy"
+        // Movement is tween-based so physics can't stop them
+        // =========================================
+
+        this.enemySprites = [];
+
+        if (objectLayer) {
+
+            const enemyObjects = objectLayer.objects.filter(
+                o => o.name === "enemy"
+            );
+
+            for (let obj of enemyObjects) {
+
+                // gid is 1-based in Tiled; subtract 1 for Phaser frame index
+                const frame = obj.gid - 1;
+
+                const enemy = this.add.sprite(
+                    obj.x,
+                    obj.y,
+                    "tilemap_sheet",
+                    frame
+                );
+
+                // Static body used only for overlap detection — no gravity, no physics movement
+                this.physics.world.enable(
+                    enemy,
+                    Phaser.Physics.Arcade.STATIC_BODY
+                );
+
+                enemy.anims.play("enemyWalk");
+
+                const patrolDist = 80;
+
+                // Tween handles all movement reliably — no risk of velocity being zeroed
+                this.tweens.add({
+                    targets: enemy,
+                    x: obj.x + patrolDist,
+                    duration: 1500,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: "Linear",
+                    onYoyo: () => { enemy.setFlipX(true); },
+                    onRepeat: () => { enemy.setFlipX(false); },
+                    onUpdate: () => {
+                        if (enemy.body) {
+                            enemy.body.reset(enemy.x, enemy.y);
+                        }
+                    }
+                });
+
+                this.enemySprites.push(enemy);
+            }
+        }
+
+        this.physics.add.overlap(
+            my.sprite.player,
+            this.enemySprites,
+            this.hurtPlayer,
+            null,
+            this
+        );
+
+        // =========================================
         // INPUT
         // =========================================
 
         this.cursors = this.input.keyboard.createCursorKeys();
 
         this.rKey = this.input.keyboard.addKey("R");
+
+        // Debug: press 2 to jump straight to level 2
+        this.twoKey = this.input.keyboard.addKey("TWO");
 
         this.input.keyboard.on(
             "keydown-D",
@@ -418,6 +489,11 @@ class Platformer extends Phaser.Scene {
             this.scene.start("platformerScene", { level: this.currentLevel });
         }
 
+        if (Phaser.Input.Keyboard.JustDown(this.twoKey)) {
+            this.sound.stopAll();
+            this.scene.start("platformerScene", { level: 1 });
+        }
+
         if (this.levelComplete) {
             return;
         }
@@ -606,5 +682,27 @@ class Platformer extends Phaser.Scene {
 
             this.hasPlayedLandSound = true;
         }
+
+    }
+
+    hurtPlayer(player, enemy) {
+
+        if (this.isHurt) return;
+
+        this.isHurt = true;
+
+        this.sound.play("hurt", { volume: 0.5 });
+        this.cameras.main.shake(150, 0.008);
+
+        my.sprite.player.setPosition(
+            this.levelConfig.spawnX,
+            this.levelConfig.spawnY
+        );
+        my.sprite.player.setVelocity(0, 0);
+
+        // 1-second invincibility window so one enemy doesn't chain-kill
+        this.time.delayedCall(1000, () => {
+            this.isHurt = false;
+        });
     }
 }
