@@ -289,6 +289,80 @@ class Platformer extends Phaser.Scene {
         );
 
         // =========================================
+        // MOVING PLATFORMS
+        //
+        // Tiled: Object layer "Objects", Name = "movingPlatform"
+        // Optional custom properties: moveDistance (int, px), axis ("x" or "y")
+        // Defaults: horizontal, 80px
+        // =========================================
+
+        this.movingPlatformSprites = [];
+
+        if (objectLayer) {
+
+            const platformObjects = objectLayer.objects.filter(
+                o => o.name === "movingPlatform"
+            );
+
+            for (let obj of platformObjects) {
+
+                const frame = obj.gid - 1;
+
+                const plat = this.add.sprite(
+                    obj.x,
+                    obj.y,
+                    "tilemap_sheet",
+                    frame
+                );
+
+                this.physics.world.enable(
+                    plat,
+                    Phaser.Physics.Arcade.STATIC_BODY
+                );
+
+                // Read optional Tiled custom properties
+                const props = {};
+                if (obj.properties) {
+                    for (let p of obj.properties) {
+                        props[p.name] = p.value;
+                    }
+                }
+
+                const moveDistance = props.moveDistance || 80;
+                const axis = props.axis || "x";
+
+                const tweenConfig = {
+                    targets: plat,
+                    duration: 2000,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: "Sine.easeInOut",
+                    onUpdate: () => {
+                        if (plat.body) {
+                            plat.body.reset(plat.x, plat.y);
+                        }
+                    }
+                };
+
+                if (axis === "y") {
+                    tweenConfig.y = obj.y + moveDistance;
+                } else {
+                    tweenConfig.x = obj.x + moveDistance;
+                }
+
+                this.tweens.add(tweenConfig);
+                this.movingPlatformSprites.push(plat);
+            }
+        }
+
+        if (this.movingPlatformSprites.length > 0) {
+            this.physics.add.collider(
+                my.sprite.player,
+                this.movingPlatformSprites
+            );
+        }
+
+        // =========================================
         // INPUT
         // =========================================
 
