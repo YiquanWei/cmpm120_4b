@@ -56,7 +56,7 @@ class Credits extends Phaser.Scene {
             "Design & Programming    Yiquan Wei",
             "Tileset    Kenney 1-Bit Platformer Pack  (kenney.nl)",
             "Background Music    Yiquan Wei",
-            "Sound Effects    Pixabay  (pixabay.com/sound-effects)"
+            "Sound Effects    from previous class assignments"
         ];
 
         creditLines.forEach((line, i) => {
